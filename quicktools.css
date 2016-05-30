@@ -1,0 +1,24 @@
+body {
+    background-color: #181818;
+    color: LightGrey;
+    font-family: monospace;
+    font-size: 120%;
+}
+
+span.content {
+    font-weight: bold;
+    color: LightGrey;
+}
+
+span.user {
+    color: LightSkyBlue;
+}
+
+a:link, a:visited {
+    color: OrangeRed;
+    text-decoration: none;
+}
+
+span.reported {
+    color: Tomato;
+}
