@@ -4,10 +4,10 @@
  */
 
 //ID provided by Wikia to connect to the correct wiki (fetched from elderscrolls.wikia.com/api.php?action=query&meta=siteinfo&siprop=wikidesc&format=json)
-if(isset($_GET['id'])) {
-    $wikiID = $_GET['id'];
+if(isset($_GET['wiki'])) {
+    $wiki = $_GET['wiki'];
 } else {
-    $wikiID = 1706; //Elder Scrolls
+    $wiki = elderscrolls;
 }
 
 if(isset($_GET['rclimit'])) {
@@ -18,10 +18,16 @@ if(isset($_GET['rclimit'])) {
 
 //set up curl request
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://services.wikia.com/discussion/" . $wikiID . "/posts?limit=" . $rcLimit . "&page=0&responseGroup=small&reported=false&viewableOnly=true");
+curl_setopt($ch, CURLOPT_URL, "https://" . $wiki . ".wikia.com/api.php?action=query&meta=siteinfo&siprop=wikidesc&format=json");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-//execute curl
+//get wikiID
+$output = curl_exec($ch);
+$arr_json = json_decode($output, true);
+$wikiID = $arr_json["query"]["wikidesc"]["id"];
+
+//get posts (expensive)
+curl_setopt($ch, CURLOPT_URL, "https://services.wikia.com/discussion/" . $wikiID . "/posts?limit=" . $rcLimit . "&page=0&responseGroup=small&reported=false&viewableOnly=true");
 $output = curl_exec($ch);
 
 //free
@@ -42,7 +48,7 @@ foreach($arr_json["_embedded"]["doc:posts"] as $post) {
     $bool_isReported = $post["isReported"];
     $dt = new DateTime("@$epoch");
 
-    echo("\t<span class=\"date\">" . $dt->format('H:i:s') . ":</span> <a href=\"http://elderscrolls.wikia.com/d/p/" . $threadID . "/r/" . $postID . "\" target=\"_blank\"><span class=\"content" . ($bool_isReported ? ' reported' : '' ) . "\">" . $content . "</span></a> — <span class=\"user\">" . $user . "</span><br />" . PHP_EOL);
+    echo("\t<span class=\"date\">" . $dt->format('H:i:s') . ":</span> <a href=\"http://" . $wiki . ".wikia.com/d/p/" . $threadID . "/r/" . $postID . "\" target=\"_blank\"><span class=\"content" . ($bool_isReported ? ' reported' : '' ) . "\">" . $content . "</span></a> — <span class=\"user\">" . $user . "</span><br />" . PHP_EOL);
         // — <a href=\"#\" onclick=\"deletePost(" . $wikiID . "," . $postID . ")\">DELETE</a>
 }
 
