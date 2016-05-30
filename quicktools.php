@@ -42,7 +42,8 @@ foreach($arr_json["_embedded"]["doc:posts"] as $post) {
     $bool_isReported = $post["isReported"];
     $dt = new DateTime("@$epoch");
 
-    echo("\t<span class=\"date\">" . $dt->format('H:i:s') . ":</span> <a href=\"http://elderscrolls.wikia.com/d/p/" . $threadID . "/r/" . $postID . "\" target=\"_blank\"><span class=\"content" . ($bool_isReported ? ' reported' : '' ) . "\">" . $content . "</span></a> — <span class=\"user\">" . $user . "</span> — <a href=\"#\" onclick=\"deletePost(" . $wikiID . "," . $postID . ")\">DELETE</a><br />" . PHP_EOL);
+    echo("\t<span class=\"date\">" . $dt->format('H:i:s') . ":</span> <a href=\"http://elderscrolls.wikia.com/d/p/" . $threadID . "/r/" . $postID . "\" target=\"_blank\"><span class=\"content" . ($bool_isReported ? ' reported' : '' ) . "\">" . $content . "</span></a> — <span class=\"user\">" . $user . "</span><br />" . PHP_EOL);
+        // — <a href=\"#\" onclick=\"deletePost(" . $wikiID . "," . $postID . ")\">DELETE</a>
 }
 
 echo("</body></html>" . PHP_EOL);
