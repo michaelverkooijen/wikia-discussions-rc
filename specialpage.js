@@ -1,3 +1,10 @@
+/**
+* @author: Flightmare (http://elderscrolls.wikia.com/wiki/User:Flightmare)
+* @version: 1.0
+* @license: CC-BY-SA 3.0
+* @description: Creates a flat feed for discussions module on Special:DiscussionsFeed. Includes moderation tools.
+*/
+
 function updateFeed(content) {
     var rcLimit = 25;
     console.log("sending xhr");
@@ -19,14 +26,16 @@ function updateFeed(content) {
                 //Create HTML for date:
                 var spanDate = document.createElement("SPAN");
                 spanDate.className = "df-date";
-                var spanDateText = document.createTextNode("DATE ");
+                var spanDateText = document.createTextNode(dt + ": ");
                 spanDate.appendChild(spanDateText);
 
-                //Create HTML for message body: TODO: anchor
-                var spanMessage = document.createElement("SPAN");
-                spanMessage.className = "df-content";
-                var spanMessageText = document.createTextNode(text);
-                spanMessage.appendChild(spanMessageText);
+                //Create HTML for message body:
+                var aMessage = document.createElement("A");
+                aMessage.className = "df-content";
+                aMessage.href = "https://elderscrolls.wikia.com/d/p/" + threadID + "/r/" + postID; //TODO: dynamic wiki name
+                aMessage.target = "_blank";
+                var aMessageText = document.createTextNode(text);
+                aMessage.appendChild(aMessageText);
 
                 //Create HTML for user:
                 var spanUser = document.createElement("SPAN");
@@ -35,8 +44,9 @@ function updateFeed(content) {
                 spanUser.appendChild(spanUserText);
 
                 var par = document.createElement("P");
+                par.className = "df-entry";
                 par.appendChild(spanDate);
-                par.appendChild(spanMessage);
+                par.appendChild(aMessage);
                 par.appendChild(spanUser);
                 content.appendChild(par);
             }
@@ -59,10 +69,6 @@ function createDiscussionsFeed() {
         var isMod = Boolean(canBlock || wgUserGroups.indexOf('threadmoderator') > -1);
         var content = document.getElementById("mw-content-text");
         content.innerHTML = 'Loading feed...<div id="ajaxloader"></div>';
-        var entry = document.createElement("P");
-        var entryText = document.createTextNode("Mod: " + isMod);
-        entry.appendChild(entryText);
-        content.appendChild(entry);
         updateFeed(content);
     }
 }
