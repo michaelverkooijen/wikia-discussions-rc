@@ -1,13 +1,12 @@
 /**
 * @author: Flightmare (http://elderscrolls.wikia.com/wiki/User:Flightmare)
-* @version: 1.0
+* @version: 1.0.1
 * @license: CC-BY-SA 3.0
 * @description: Creates a flat feed for discussions module on Special:DiscussionsFeed. Includes moderation tools.
 */
 
-function updateFeed(content, isMod) {
+function updateFeed(content) {
     var rcLimit = 25;
-    console.log("sending xhr");
     var request = new XMLHttpRequest();
     request.onreadystatechange = function() {
         if(request.readyState == 4 && request.status == 200) {
@@ -21,17 +20,13 @@ function updateFeed(content, isMod) {
                 var threadID = arr["_embedded"]["doc:posts"][i].threadId;
                 var isReported = arr["_embedded"]["doc:posts"][i].isReported;
                 var dt = new Date(epoch * 1000);
-
-                //Create HTML:
-                var par = document.createElement("P");
-                par.className = "df-entry";
+                var formattedDate = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds()
 
                 //Create HTML for date:
                 var spanDate = document.createElement("SPAN");
                 spanDate.className = "df-date";
-                var spanDateText = document.createTextNode(dt + ": ");
+                var spanDateText = document.createTextNode(formattedDate + " — ");
                 spanDate.appendChild(spanDateText);
-                par.appendChild(spanDate);
 
                 //Create HTML for message body:
                 var aMessage = document.createElement("A");
@@ -40,24 +35,18 @@ function updateFeed(content, isMod) {
                 aMessage.target = "_blank";
                 var aMessageText = document.createTextNode(text);
                 aMessage.appendChild(aMessageText);
-                par.appendChild(aMessage);
 
                 //Create HTML for user:
                 var spanUser = document.createElement("SPAN");
                 spanUser.className = "df-user";
                 var spanUserText = document.createTextNode(" — " + user);
                 spanUser.appendChild(spanUserText);
+
+                var par = document.createElement("P");
+                par.className = "df-entry";
+                par.appendChild(spanDate);
+                par.appendChild(aMessage);
                 par.appendChild(spanUser);
-
-                //Create Delete button for moderators:
-                if (isMod) {
-                    var btnDelete = document.createElement("button");
-                    btnDelete.type = "button";
-                    btnDelete.textContent = "Delete";
-                    btnDelete.addEventListener("click", deletePost(postID));
-                    par.appendChild(btnDelete);
-                }
-
                 content.appendChild(par);
             }
         }
@@ -75,12 +64,12 @@ function deletePost(postID) {
 }
 
 function createDiscussionsFeed() {
-    if(wgPageName == 'Special:DiscussionsFeed') {
+    if(wgNamespaceNumber == -1 && wgTitle == "DiscussionsFeed") { //TODO: i18n make dictionary
         document.title = 'Discussions Feed - ' + wgSiteName;
         var canBlock = Boolean(wgUserGroups.indexOf('sysop') > -1 || wgUserGroups.indexOf('staff') > -1 || wgUserGroups.indexOf('helper') > -1 || wgUserGroups.indexOf('vstf') > -1);
         var isMod = Boolean(canBlock || wgUserGroups.indexOf('threadmoderator') > -1);
         var content = document.getElementById("mw-content-text");
-        content.innerHTML = 'Loading feed...<div id="ajaxloader"></div>';
+        content.innerHTML = 'Loading feed...<img src="http://vignette4.wikia.nocookie.net/wlb/images/7/74/WIP.gif/revision/latest?cb=20130731182655" /></div>';
         updateFeed(content, isMod);
     }
 }
