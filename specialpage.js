@@ -84,19 +84,12 @@ function updateFeed(content, isMod, canBlock) {
     request.send();
 }
 
-function deletePost(postID) {
-    console.log("Deleting post: " + postID);
-    var request = new XMLHttpRequest();
-    request.open("PUT", "https://services.wikia.com/discussion/" + wgCityId + "/posts/" + postID + "/delete", true);
-    request.send();
-}
-
 function createDiscussionsFeed() {
     if(wgNamespaceNumber == -1 && wgTitle == "DiscussionsFeed") { //TODO: i18n make dictionary
         document.title = 'Discussions Feed - ' + wgSiteName;
         var canBlock = Boolean(wgUserGroups.indexOf('sysop') > -1 || wgUserGroups.indexOf('staff') > -1 || wgUserGroups.indexOf('helper') > -1 || wgUserGroups.indexOf('vstf') > -1);
         var isMod = Boolean(canBlock || wgUserGroups.indexOf('threadmoderator') > -1);
-        document.getElementById("firstHeading").innerHTML = "<h1 id="firstHeading" class="firstHeading">Discussions Feed</h1>"; //Monobook skin title
+        document.getElementById("firstHeading").innerHTML = '<h1 id="firstHeading" class="firstHeading">Discussions Feed</h1>'; //Monobook skin title
         document.getElementById("WikiaPageHeader").getElementsByTagName("h1")[0].innerHTML = "<h1>Discussions Feed</h1>"; //Wikia skin title
         var content = document.getElementById("mw-content-text");
         content.innerHTML = 'Loading feed... <img src="http://vignette4.wikia.nocookie.net/wlb/images/7/74/WIP.gif/revision/latest?cb=20130731182655" /></div>';
