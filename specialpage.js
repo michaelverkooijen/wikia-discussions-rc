@@ -1,6 +1,6 @@
 /**
 * @author: Flightmare (http://elderscrolls.wikia.com/wiki/User:Flightmare)
-* @version: 1.1
+* @version: 1.0.2
 * @license: CC-BY-SA 3.0
 * @description: Creates a flat feed for discussions module on Special:DiscussionsFeed. Includes moderation tools.
 */
@@ -15,6 +15,7 @@ function updateFeed(content, isMod, canBlock) {
             for (var i = 0; i < rcLimit; i++) {
                 var text = arr["_embedded"]["doc:posts"][i].rawContent;
                 var user = arr["_embedded"]["doc:posts"][i]["createdBy"].name;
+                var userId = arr["_embedded"]["doc:posts"][i]["createdBy"].id;
                 var epoch = arr["_embedded"]["doc:posts"][i]["creationDate"].epochSecond;
                 var postID = arr["_embedded"]["doc:posts"][i].id;
                 var threadID = arr["_embedded"]["doc:posts"][i].threadId;
@@ -24,50 +25,61 @@ function updateFeed(content, isMod, canBlock) {
                 var formattedDate = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds()
 
                 //Create HTML for date:
-                var spanDate = document.createElement("SPAN");
+                var spanDate = document.createElement("span");
                 spanDate.className = "df-date";
                 var spanDateText = document.createTextNode(formattedDate + " — ");
                 spanDate.appendChild(spanDateText);
 
                 //Create HTML for message body:
-                var aMessage = document.createElement("A");
+                var aMessage = document.createElement("a");
                 aMessage.className = "df-content";
-                aMessage.href = "https://" + wgDBname + ".wikia.com/d/p/" + threadID + "/r/" + postID;
+                aMessage.href = "/d/p/" + threadID;
                 aMessage.target = "_blank";
                 var aMessageText = document.createTextNode(text);
                 aMessage.appendChild(aMessageText);
 
                 //Create HTML for user:
-                var spanUser = document.createElement("SPAN");
-                spanUser.className = "df-user";
-                var spanUserText = document.createTextNode(" — " + user);
-                spanUser.appendChild(spanUserText);
+                var aUser = document.createElement("a");
+                aUser.className = "df-user";
+                aUser.href = "/d/u/" + userId;
+                aUser.target = "_blank";
+                var aUserText = document.createTextNode(" — " + user);
+                aUser.appendChild(aUserText);
 
-                if (isMod) {
-                    var aDelete = document.createElement("A");
-                    aDelete.className = "df-delete";
-                    aDelete.href = "https://services.wikia.com/discussion/" + wgCityId + "/posts/" + postID + "/delete";
-                    aDelete.target = "_blank";
-                    var aDeleteText = document.createTextNode(" delete");
-                    aDelete.appendChild(aDeleteText);
+                //Create HTML for category:
+                var spanCategory = document.createElement("span");
+                spanCategory.className = "df-category";
+                var spanCategoryText = document.createTextNode(" in" + forumName);
+                spanCategory.appendChild(spanCategoryText);
+
+                //Create block button
+                if (canBlock) {
+                    var aBlock = document.createElement("a");
+                    aBlock.className = "df-block";
+                    aBlock.href = "/wiki/Special:Block/" + user;
+                    aBlock.target = "_blank";
+                    var aBlockText = document.createTextNode(" (block)");
+                    aBlock.appendChild(aBlockText);
                 }
 
-                var par = document.createElement("P");
+                //Put everything together
+                var par = document.createElement("p");
                 par.className = "df-entry";
                 if (isReported) {
                     par.className += " df-reported"
                 }
                 par.appendChild(spanDate);
                 par.appendChild(aMessage);
-                par.appendChild(spanUser);
-                if (isMod) {
-                    par.appendChild(aDelete);
+                par.appendChild(aUser);
+                par.appendChild(spanCategory);
+                if (canBlock) {
+                    par.appendChild(aBlock);
                 }
                 content.appendChild(par);
             }
         }
     };
-    request.open("GET", "https://services.wikia.com/discussion/" + wgCityId + "/posts?limit=" + rcLimit + "&page=0&responseGroup=small&reported=" + (!isMod).toString() + "&viewableOnly=" + (!isMod).toString(), true);
+    request.open("GET", "https://services.wikia.com/discussion/" + wgCityId + "/posts?limit=" + rcLimit + "&page=0&responseGroup=small&reported=false&viewableOnly=" + (!isMod).toString(), true);
     request.setRequestHeader('Accept', 'application/hal+json');
     request.send();
 }
@@ -84,6 +96,8 @@ function createDiscussionsFeed() {
         document.title = 'Discussions Feed - ' + wgSiteName;
         var canBlock = Boolean(wgUserGroups.indexOf('sysop') > -1 || wgUserGroups.indexOf('staff') > -1 || wgUserGroups.indexOf('helper') > -1 || wgUserGroups.indexOf('vstf') > -1);
         var isMod = Boolean(canBlock || wgUserGroups.indexOf('threadmoderator') > -1);
+        document.getElementById("firstHeading").innerHTML = "<h1 id="firstHeading" class="firstHeading">Discussions Feed</h1>"; //Monobook skin title
+        document.getElementById("WikiaPageHeader").getElementsByTagName("h1")[0].innerHTML = "<h1>Discussions Feed</h1>"; //Wikia skin title
         var content = document.getElementById("mw-content-text");
         content.innerHTML = 'Loading feed... <img src="http://vignette4.wikia.nocookie.net/wlb/images/7/74/WIP.gif/revision/latest?cb=20130731182655" /></div>';
         updateFeed(content, isMod, canBlock);
