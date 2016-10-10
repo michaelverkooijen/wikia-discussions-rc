@@ -8,6 +8,10 @@
 function updateFeed(content, isMod, canBlock) {
     var rcLimit = 50;
     var request = new XMLHttpRequest();
+    request.timeout = 30000; // 30 seconds
+    request.ontimeout = function() {
+        content.innerHTML = "Unable to load discussions: The service is down or is not enabled for this domain."
+    }
     request.onreadystatechange = function() {
         if(request.readyState == 4 && request.status == 200) {
             var arr = JSON.parse(request.responseText);
@@ -49,7 +53,7 @@ function updateFeed(content, isMod, canBlock) {
                 //Create HTML for category:
                 var spanCategory = document.createElement("span");
                 spanCategory.className = "df-category";
-                var spanCategoryText = document.createTextNode(" in" + forumName);
+                var spanCategoryText = document.createTextNode(" in " + forumName);
                 spanCategory.appendChild(spanCategoryText);
 
                 //Create block button
@@ -89,8 +93,11 @@ function createDiscussionsFeed() {
         document.title = 'Discussions Feed - ' + wgSiteName;
         var canBlock = Boolean(wgUserGroups.indexOf('sysop') > -1 || wgUserGroups.indexOf('staff') > -1 || wgUserGroups.indexOf('helper') > -1 || wgUserGroups.indexOf('vstf') > -1);
         var isMod = Boolean(canBlock || wgUserGroups.indexOf('threadmoderator') > -1);
-        document.getElementById("firstHeading").innerHTML = '<h1 id="firstHeading" class="firstHeading">Discussions Feed</h1>'; //Monobook skin title
-        document.getElementById("WikiaPageHeader").getElementsByTagName("h1")[0].innerHTML = "<h1>Discussions Feed</h1>"; //Wikia skin title
+        if (window.skin == "oasis") {
+            document.getElementById("WikiaPageHeader").getElementsByTagName("h1")[0].innerHTML = "<h1>Discussions Feed</h1>"; //Oasis skin title
+        } else if (window.skin == "monobook") {
+            document.getElementById("firstHeading").innerHTML = '<h1 id="firstHeading" class="firstHeading">Discussions Feed</h1>'; //Monobook skin title
+        }
         var content = document.getElementById("mw-content-text");
         content.innerHTML = 'Loading feed... <img src="http://vignette4.wikia.nocookie.net/wlb/images/7/74/WIP.gif/revision/latest?cb=20130731182655" /></div>';
         updateFeed(content, isMod, canBlock);
